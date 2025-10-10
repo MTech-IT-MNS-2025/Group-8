@@ -1,2 +1,2 @@
-Task1 : Chinmaya Kumar Nayak(MNS2025014)
+Task1 : Chinmaya Kumar Nayak(MNS2025014) list_algorithms.c
 Task2 : Anshul (mns2025013) alice.cpp, bob.cpp

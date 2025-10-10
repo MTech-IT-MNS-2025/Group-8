@@ -1,0 +1,175 @@
+﻿Task 4: Comparative Study
+
+
+(PQC) vs Classical Algorithms:
+
+
+
+
+1.Introduction
+
+
+Modern cryptographic systems like RSA are widely used for securing communication and digital signatures.  these algorithms depend on mathematical problems like integer factorization and discrete logarithm, which can be broken easily by quantum computers using Shor’s algorithm 
+To prepare for this, researchers have developed new cryptographic methods called PQC. These algorithms are designed to resist attacks from both classical and quantum computers
+
+
+several PQC algorithms such as:
+
+
+CRYSTALS-Dilithium – for digital signatures
+CRYSTALS-Kyber – for encryption and key exchange (KEM)
+
+
+
+
+2.Comparison between PQC and Classical Algorithms
+
+
+(a) Key sizes
+
+
+
+
+Algorithm                         Public key size (B)            Private key size(B)              Signature/Ciphertext
+RSA-2048 (Classical)                270                        1190                        256
+Dilithium-2 (PQC)                1312                        2528                        2420
+Kyber-512 (PQC)                800                        1632                        768
+
+
+
+
+
+
+ Observation: 
+ 
+1.PQC algorithms generally use larger keys than RSA 
+2.Kyber and Dilithium have moderate sizes and are practical for most systems
+
+
+
+
+
+
+(b) Signature / Ciphertext sizes
+Classical algorithms have small signature sizes (hundreds of bytes).
+PQC schemes have signatures and ciphertexts ranging from hundreds to a few thousand bytes
+Larger sizes may affect bandwidth and storage, but still acceptable for most internet protocols.
+
+
+
+
+
+
+
+
+(c) Execution times 
+
+
+Kyber and Dilithium are fast and efficient, performing encryption, decryption, and signing in microseconds on modern CPUs.
+Classic McEliece has fast encryption/decryption but very slow key generation and large key storage requirements.
+Overall, Kyber and Dilithium provide the best balance between speed and security
+
+
+
+
+
+
+3.Practical PQC Algorithms for Real-World Use
+
+
+
+
+Among all PQC algorithms, CRYSTALS-Kyber (for encryption) and CRYSTALS-Dilithium (for digital signatures) are the most practical for real-world applications because:
+
+
+Why Dilithium is practical:
+1. Reliable Security:
+ Like Kyber, it is based on lattice problems, providing strong resistance to quantum attacks.
+
+2. Efficient Operation:
+ Dilithium performs signature generation and verification quickly, making it suitable for large-scale systems such as software updates, digital certificates, and document signing.
+
+3. Balanced Sizes:
+ Public keys are around 1–2 KB, and signatures are 2–3 KB — larger than classical signatures but still small enough for modern networks.
+
+4. Easy to Implement:
+ Unlike Falcon, which uses complex floating-point math, Dilithium uses simple integer arithmetic, reducing the risk of programming errors and side-channel attacks.
+
+5. Supported by NIST:
+ Since it is officially standardized,it is widely supported in libraries like OpenSSL and liboqs.
+
+
+
+
+
+
+
+
+4. Trade-offs between Security, Performance, and Key Size
+
+
+Security vs Performance:
+Higher security levels (like Kyber-768 or Dilithium-3) use larger keys and more computation time. There is always a balance between speed and strength.
+
+Key Size vs Practicality:
+Some PQC algorithms (e.g., McEliece) have massive keys that make them hard to use in small devices or mobile networks.
+
+Algorithm Diversity:
+Most efficient PQC algorithms are lattice-based, but to reduce risk, it’s good to also include hash-based or code-based schemes for backup security
+
+
+
+
+
+
+In conclusion, the main trade-off in PQC is between future-proof security and practical performance. Developers and organizations must select algorithms based on their system capabilities, risk level, and communication environment.
+
+
+
+
+
+
+
+
+5.Hybrid Schemes (PQC + Classical)
+
+
+1.Definition:
+
+
+A hybrid scheme combines a classical cryptographic algorithm like RSA with a PQC algorithm in the same system. This approach protects data even if one of them becomes insecure.
+
+
+
+
+2.How Hybrid Schemes Work:
+
+
+In encryption/key exchange:
+
+A session key is derived from both a classical key exchange and a PQC key exchange The final key is a combination of both secrets.
+
+In digital signatures:
+
+A message can be signed using both ECDSA and Dilithium, giving security from both classical and quantum threats.
+
+In certificates:
+ Hybrid certificates can carry both classical and PQC public keys, helping with backward compatibility during the transition period.
+
+
+3.Advantages of Hybrid Schemes:
+
+
+Protection from both classical and quantum attacks.
+
+Allows gradual migration to PQC.
+
+Maintains compatibility with existing systems
+
+
+
+
+4.Disadvantages
+Increases bandwidth and computation cost.
+Certificates and messages become larger.
+More complex key management.

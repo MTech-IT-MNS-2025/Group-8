@@ -50,3 +50,16 @@ gcc list_algorithms.c -loqs -lcrypto -ldl -o list_algorithms
 
 > `-loqs` links liboqs, `-lcrypto` links OpenSSL (required by liboqs), and `-ldl` links the dynamic loader library.
 
+To run your C++ program in the file "alice.cpp"
+
+Compile the program
+
+text
+g++ alice.cpp -o alice
+This will compile the code and create an executable named "alice".
+
+Run the executable
+
+text
+./alice
+This will execute your compiled program.

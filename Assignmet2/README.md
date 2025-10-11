@@ -55,12 +55,37 @@ gcc list_algorithms.c -loqs -lcrypto -ldl -o list_algorithms
 #### Compile the program
 
 ```bash
-g++ alice.cpp -o alice
+g++ alice.cpp -o alice -lOQS
 
-# This will compile the code and create an executable named "alice".
 ```
+ > This links your code with the liboqs library, which seems required from the use of OQSKEM functions in your code.
+>  Prepare for execution:
+Make sure required header files and libraries (oqs/oqs.h, liboqs) are installed, and any input files (ciphertext.bin from Bob) are available in the working directory.
 #### Run the executable
 ```bash
 ./alice
 # This will execute your compiled program.
 ```
+>Generate a keypair (saves alicepk.bin and alicesk.bin)
+Wait for ciphertext.bin from Bob
+Attempt to decapsulate and output the shared secret if successful.
+>
+### To run your C++ program in the file "bob.cpp"
+#### Requirements
+The file alicepk.bin (Alice's public key) must already exist in the working directory, created by first running alice.cpp first.
+>The liboqs development package must be installed, ensuring all header files are accessible.
+
+### Compile the Program
+```bash
+g++ bob.cpp -o bob -lOQS
+
+```
+> This command compiles the code and links with liboqs, which is required for the quantum-safe cryptography functions present in the code.
+
+### Run the Program
+```bash
+./bob
+> This command will perform the following:
+> Reads Alice's public key from alicepk.bin
+> Generates ciphertext and shared secret
+> Saves ciphertext in ciphertext.bin for Alice to use

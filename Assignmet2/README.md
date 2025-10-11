@@ -93,10 +93,9 @@ g++ bob.cpp -o bob -lOQS
  
 
 
-```markdown
----
 
-## Assignment 3: Digital Signatures (RSA vs Dilithium2 / ML-DSA-44)
+
+## Task 3: Digital Signatures (RSA vs Dilithium2 / ML-DSA-44)
 
 This task demonstrates digital signatures using both a classical algorithm (RSA‑2048) and a post‑quantum algorithm (Dilithium2 / ML‑DSA‑44).
 

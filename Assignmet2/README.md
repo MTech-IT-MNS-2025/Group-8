@@ -106,3 +106,33 @@ cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr/local -DOQS_ENABLE_SIG_DILITHIUM=ON -D
 ninja
 sudo ninja install
 
+---
+
+### Task 3: Digital Signatures (RSA vs Dilithium2 / ML-DSA-44)
+
+This task demonstrates digital signatures using both a classical algorithm (RSA‑2048) and a post‑quantum algorithm (Dilithium2 / ML‑DSA‑44).
+
+#### Compile the programs
+```bash
+# Compile the PQC signature demo
+g++ pqc.cpp -o pqc -loqs
+
+# Compile the RSA signature demo
+g++ rsa.cpp -o rsa -lcryptopp
+
+# Run PQC (Dilithium2 / ML-DSA-44)
+./pqc
+# Expected output:
+# [Dilithium2] Verify: SUCCESS
+# Public key size: ~1312 bytes
+# Private key size: ~2560 bytes
+# Signature size: ~2420 bytes
+
+# Run RSA-2048
+./rsa
+# Expected output:
+# [RSA-2048] Verify: SUCCESS
+# Public key size: 256 bytes
+# Private key size: ~1192 bytes (DER encoded)
+# Signature size: 256 bytes
+

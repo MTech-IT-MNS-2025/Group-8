@@ -86,6 +86,6 @@ g++ bob.cpp -o bob -lOQS
 ```bash
 ./bob
 > This command will perform the following:
-> Reads Alice's public key from alicepk.bin
-> Generates ciphertext and shared secret
-> Saves ciphertext in ciphertext.bin for Alice to use
+ Reads Alice's public key from alicepk.bin
+ Generates ciphertext and shared secret
+ Saves ciphertext in ciphertext.bin for Alice to use .

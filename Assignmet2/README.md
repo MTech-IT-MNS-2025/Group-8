@@ -90,3 +90,19 @@ g++ bob.cpp -o bob -lOQS
  Reads Alice's public key from alicepk.bin
  Generates ciphertext and shared secret
  Saves ciphertext in ciphertext.bin for Alice to use .
+ 
+## Note for Task 3 (Digital Signatures with Dilithium2 / ML-DSA-44)
+
+By default, some signature algorithms (like Dilithium2) may not be enabled in liboqs.
+If you see the error:
+You need to rebuild liboqs with Dilithium support.
+
+### Rebuild liboqs with Dilithium enabled
+```bash
+cd ~/liboqs
+rm -rf build
+mkdir build && cd build
+cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr/local -DOQS_ENABLE_SIG_DILITHIUM=ON -DOQS_DIST_BUILD=ON ..
+ninja
+sudo ninja install
+

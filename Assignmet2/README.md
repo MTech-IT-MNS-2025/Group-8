@@ -91,35 +91,58 @@ g++ bob.cpp -o bob -lOQS
  Generates ciphertext and shared secret
  Saves ciphertext in ciphertext.bin for Alice to use .
  
-## Note for Task 3 (Digital Signatures with Dilithium2 / ML-DSA-44)
 
-By default, some signature algorithms (like Dilithium2) may not be enabled in liboqs.
-If you see the error:
-You need to rebuild liboqs with Dilithium support.
+
+```markdown
+---
+
+## Assignment 3: Digital Signatures (RSA vs Dilithium2 / ML-DSA-44)
+
+This task demonstrates digital signatures using both a classical algorithm (RSA‑2048) and a post‑quantum algorithm (Dilithium2 / ML‑DSA‑44).
 
 ### Rebuild liboqs with Dilithium enabled
+By default, Dilithium may not be enabled in liboqs.  
+If you see:
+```
+Dilithium2 not enabled.
+```
+you need to do a **clean rebuild**.
+
+1. Go to your `liboqs` folder:
 ```bash
 cd ~/liboqs
-rm -rf build
+```
+
+2. Delete the existing `build` folder completely.  
+   - Either run:
+     ```bash
+     rm -rf build
+     ```
+   - Or manually delete the `build` folder in your file explorer.
+
+3. Create a fresh build folder and reconfigure with Dilithium enabled:
+```bash
 mkdir build && cd build
 cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr/local -DOQS_ENABLE_SIG_DILITHIUM=ON -DOQS_DIST_BUILD=ON ..
 ninja
 sudo ninja install
+```
 
 ---
 
-### Task 3: Digital Signatures (RSA vs Dilithium2 / ML-DSA-44)
-
-This task demonstrates digital signatures using both a classical algorithm (RSA‑2048) and a post‑quantum algorithm (Dilithium2 / ML‑DSA‑44).
-
-#### Compile the programs
+### Compile the programs
 ```bash
 # Compile the PQC signature demo
 g++ pqc.cpp -o pqc -loqs
 
 # Compile the RSA signature demo
 g++ rsa.cpp -o rsa -lcryptopp
+```
 
+---
+
+### Run the programs
+```bash
 # Run PQC (Dilithium2 / ML-DSA-44)
 ./pqc
 # Expected output:
@@ -135,4 +158,14 @@ g++ rsa.cpp -o rsa -lcryptopp
 # Public key size: 256 bytes
 # Private key size: ~1192 bytes (DER encoded)
 # Signature size: 256 bytes
+```
 
+---
+
+### Interpretation
+- **RSA‑2048**: small keys and signatures, but not quantum‑safe.  
+- **Dilithium2 (ML‑DSA‑44)**: much larger keys and signatures, but secure against quantum attacks.  
+- This highlights the trade‑off between classical and post‑quantum digital signatures.
+
+---
+```

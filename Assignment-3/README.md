@@ -8,7 +8,7 @@ Got it — your draft is solid, it just needs proper Markdown formatting and con
 ## Project Overview
 This project is a real-time chat application built using **Next.js**, **Node.js**, **Socket.IO**, and **MongoDB**.  
 It allows users to:
-- Register and log in with a username and password.
+- Register and log in with a username .
 - View a list of registered users.
 - Connect with another user and exchange private messages in real time.
 - View chat history with timestamps.

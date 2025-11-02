@@ -17,7 +17,7 @@ It allows users to:
 The application is structured with a Next.js frontend, API routes for backend logic, a custom server with Socket.IO for real-time communication, and MongoDB for persistence.
 
 ---
-
+```
 ## Live Deployment
 The project is deployed on **Render** at the following URL:  
 [https://chatapp2-of46.onrender.com/](https://chatapp2-of46.onrender.com/)
@@ -25,6 +25,7 @@ The project is deployed on **Render** at the following URL:
 > Note: Since this is hosted on the free tier of Render, the server may take **30–60 seconds to “wake up”** if it has been idle. Please allow some time for the first request to load.
 
 ---
+```
 ```
 ## Steps to Install and Run Locally
 
@@ -57,7 +58,25 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ---
 
 ## Screenshots
-*(To be added: include login page, chat interface, and message history view.)*
+## Screenshots
+
+### Login Page
+![Login Page](public/screenshots/login.png)
+
+### Register Page
+![Register Page](public/screenshots/register.png)
+
+### Chat Interface
+Here are four different views of the chat interface:
+
+![Chat Screenshot 1](public/screenshots/chat1.png)
+![Chat Screenshot 2](public/screenshots/chat2.png)
+![Chat Screenshot 3](public/screenshots/chat3.png)
+![Chat Screenshot 4](public/screenshots/chat4.png)
+
+### MongoDB Dashboard
+![MongoDB Dashboard](public/screenshots/mongodb.png)
+
 
 ---
 

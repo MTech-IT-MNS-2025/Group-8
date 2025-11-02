@@ -25,15 +25,15 @@ The project is deployed on **Render** at the following URL:
 > Note: Since this is hosted on the free tier of Render, the server may take **30–60 seconds to “wake up”** if it has been idle. Please allow some time for the first request to load.
 
 ---
-
+```
 ## Steps to Install and Run Locally
 
 ### 1. Clone the repository
 ```bash
 git clone <repo-url>
 cd chatapp2
-```
 
+```
 ### 2. Install dependencies
 ```bash
 npm install
@@ -128,8 +128,3 @@ Through this project, I learned:
 - How to manage environment variables securely using `.env.local`.  
 ```
 
----
-
-This version fixes the broken code blocks, aligns the headings, and ensures GitHub will render it cleanly.  
-
-Would you like me to also add a **“Troubleshooting” section** at the end (e.g., Render cold start delay, MongoDB connection errors) so your professor sees you’ve thought about reliability?

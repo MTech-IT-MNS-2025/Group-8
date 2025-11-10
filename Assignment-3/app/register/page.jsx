@@ -7,17 +7,19 @@ import "./register.css";
 export default function RegisterPage() {
     const router = useRouter();
     const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
     const handleRegister = async () => {
-        if (!username.trim()) {
-            setError("Please enter a username");
+        if (!username.trim() || !password.trim()) {
+            setError("Please enter both username and password");
             return;
         }
+
         const res = await fetch("/api/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username }),
+            body: JSON.stringify({ username, password }),
         });
 
         if (res.ok) {
@@ -39,6 +41,14 @@ export default function RegisterPage() {
                     placeholder="Choose a username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
+                    className="input"
+                />
+
+                <input
+                    type="password"
+                    placeholder="Choose a password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="input"
                 />
 

@@ -2,32 +2,33 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import "./home.css"; // classic CSS import
+import "./home.css";
 
 export default function HomePage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const handleContinue = async () => {
-    if (!username.trim()) {
-      setError("Please enter a username");
+    if (!username.trim() || !password.trim()) {
+      setError("Please enter both username and password");
       return;
     }
 
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username }),
+      body: JSON.stringify({ username, password }),
     });
 
     if (res.ok) {
       router.push(`/chat?user=${encodeURIComponent(username)}`);
     } else {
-      setError("User not found. Please register first.");
+      const data = await res.json();
+      setError(data.message || "Login failed");
     }
   };
-
 
   return (
     <div className="page">
@@ -39,6 +40,14 @@ export default function HomePage() {
           placeholder="Enter your username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          className="input"
+        />
+
+        <input
+          type="password"
+          placeholder="Enter your password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           className="input"
         />
 

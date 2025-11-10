@@ -17,11 +17,11 @@ export default async function handler(req, res) {
     const messages = db.collection("messages");
 
     if (req.method === "POST") {
-        const { from, to, text } = req.body;
-        if (!from || !to || !text) {
+        const { sender, receiver, text } = req.body;
+        if (!sender || !receiver || !text) {
             return res.status(400).json({ message: "Missing fields" });
         }
-        const doc = { from, to, text, time: new Date() };
+        const doc = { sender, receiver, text, time: new Date() };
         await messages.insertOne(doc);
         return res.status(200).json({ message: "Message stored", doc });
     }
@@ -34,8 +34,8 @@ export default async function handler(req, res) {
         const history = await messages
             .find({
                 $or: [
-                    { from: user1, to: user2 },
-                    { from: user2, to: user1 },
+                    { sender: user1, receiver: user2 },
+                    { sender: user2, receiver: user1 },
                 ],
             })
             .sort({ time: 1 })

@@ -1,6 +1,7 @@
 
 
 ```markdown
+```
 ## Live Deployment
 The project is deployed on **Render** at the following URL:  
 [https://chatapp4-gc9d.onrender.com](https://chatapp4-gc9d.onrender.com)
@@ -21,10 +22,7 @@ It allows users to:
 
 The application is structured with a Next.js frontend, API routes for backend logic, a custom server with Socket.IO for real-time communication, and MongoDB for persistence.
 
----
-```
 
----
 ```
 ```
 ## Steps to Install and Run Locally
@@ -32,7 +30,7 @@ The application is structured with a Next.js frontend, API routes for backend lo
 ### 1. Clone the repository
 ```bash
 git clone <repo-url>
-cd chatapp2
+cd chatapp
 
 ```
 ### 2. Install dependencies
@@ -103,8 +101,7 @@ The project is organized into three main layers: **Frontend**, **Backend (API + 
                 | /api/login        |
                 | /api/users        |
                 | /api/message      |
-                | /api/messages     |
-                | /api/deleteMsgs   |
+                | /api/deleteMessage|
                 +---------+---------+
                           |
                           v

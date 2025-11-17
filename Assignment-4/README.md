@@ -103,5 +103,5 @@ Place both files inside the /public folder.
 - Manage memory and data types across WASM and JavaScript.
 - Build a small frontend in Next.js to interact with WASM modules.
 - Integrate traditional systems programming concepts with modern web development.
-- Strengthen understanding of encryption, buffer handling, and cross-language communication.
+
 ```

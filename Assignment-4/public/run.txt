@@ -1,0 +1,6 @@
+emcc rc4.c \
+  -sEXPORTED_FUNCTIONS='["_encrypt","_decrypt"]' \
+  -sEXPORTED_RUNTIME_METHODS='["cwrap"]' \
+  -sMODULARIZE=1 \
+  -sEXPORT_ES6=1 \
+  -o rc4.js

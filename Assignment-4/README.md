@@ -15,6 +15,16 @@ This project implements the RC4 stream cipher in native C, compiled to WebAssemb
 
 ---
 
+## UI Features
+
+- Textbox for plaintext or ciphertext (hex)
+- Textbox for key
+- Encrypt button
+- Decrypt button
+- Result display area
+
+---
+
 ## Technologies Used
 
 - C Language — RC4 implementation
@@ -85,11 +95,13 @@ Place both files inside the /public folder.
 
 ---
 
-## UI Features
+## Learning Outcomes
 
-- Textbox for plaintext or ciphertext (hex)
-- Textbox for key
-- Encrypt button
-- Decrypt button
-- Result display area
+- Understand how WebAssembly brings native C/C++ performance to the browser.
+- Compile C programs using Emscripten and expose functions to JavaScript.
+- Implement symmetric stream ciphers (RC4) at a low-level.
+- Manage memory and data types across WASM and JavaScript.
+- Build a small frontend in Next.js to interact with WASM modules.
+- Integrate traditional systems programming concepts with modern web development.
+- Strengthen understanding of encryption, buffer handling, and cross-language communication.
 ```

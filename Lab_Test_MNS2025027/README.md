@@ -1,6 +1,6 @@
 # Lab Test – Diffie-Hellman Key Exchange (Cryptography)
+```## Clone the Repository
 ```
-## Clone the Repository
 ```bash
 git clone https://github.com/MTech-IT-MNS-2025/Group-8.git
 ```

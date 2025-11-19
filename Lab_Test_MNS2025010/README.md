@@ -7,7 +7,6 @@
 - **Node.js**
 - **Next.js**
 - **React**
-- **Visual Studio Code (VS Code)**
 
 ## 3. Commands to Run the Code
 

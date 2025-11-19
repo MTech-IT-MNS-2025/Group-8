@@ -1,6 +1,3 @@
-
-
-```markdown
 # Lab Test – Diffie-Hellman Key Exchange (Cryptography)
 ```
 ## Clone the Repository

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Diffie-Hellman Key Exchange</title>
+</head>
+<body>
+  <h2>Diffie-Hellman Key Exchange</h2>
+
+  <label>Prime p:</label>
+  <input id="p" type="number"><br><br>
+
+  <label>Generator g:</label>
+  <input id="g" type="number"><br><br>
+
+  <button id="computeBtn">Compute</button>
+
+  <h3>Results</h3>
+  <pre id="output"></pre>
+
+  <script type="module">
+    import createModule from "./modexp.js";
+
+    const Module = await createModule();
+    const modexp = Module._modexp;
+
+    function randZp(p) {
+      return Math.floor(Math.random() * (p - 2)) + 2;
+    }
+
+    document.getElementById("computeBtn").onclick = async () => {
+      const p = Number(document.getElementById("p").value);
+      const g = Number(document.getElementById("g").value);
+      const out = document.getElementById("output");
+
+      if (!p || !g) {
+        out.textContent = "Enter valid p and g";
+        return;
+      }
+
+      // Step 2: generate a
+      const a = randZp(p);
+
+      // Step 3: compute x = g^a mod p using WASM
+      const x = modexp(BigInt(g), BigInt(a), BigInt(p));
+
+      // Step 4: send <g, p, x> to server
+      const res = await fetch("http://localhost:3000/dh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          g,
+          p,
+          x: x.toString()
+        })
+      });
+
+      const data = await res.json();
+
+      // Step 5: show only K, y, a
+      out.textContent =
+        "K = " + data.K + "\n" +
+        "y = " + data.y + "\n" +
+        "a = " + a + "\n";
+    };
+  </script>
+</body>
+</html>

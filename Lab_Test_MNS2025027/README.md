@@ -1,14 +1,5 @@
 # Lab Test – Diffie-Hellman Key Exchange (Cryptography)
-```## Clone the Repository
-```
-```bash
-git clone https://github.com/MTech-IT-MNS-2025/Group-8.git
-```
-Then navigate to your folder:
-```bash
-cd Group-8/Lab_Test_MNS2025027
-```
-
+---
 
 ---
 
@@ -22,6 +13,15 @@ cd Group-8/Lab_Test_MNS2025027
 - Emscripten (to compile C code to WebAssembly)
 - WebAssembly (generated `.wasm` file used in browser)
 
+## Clone the Repository
+
+```bash
+git clone https://github.com/MTech-IT-MNS-2025/Group-8.git
+```
+Then navigate to your folder:
+```bash
+cd Group-8/Lab_Test_MNS2025027
+```
 ## Commands to Run the Code
 1. Install dependencies (since `node_modules` is not uploaded):
    ```bash
@@ -42,9 +42,12 @@ cd Group-8/Lab_Test_MNS2025027
    - Client displays `<K, y, a>` on the frontend.
 
 ## MD5 Digest Command Used During Lab Test
+
+-First created the .zip file of the folder.
+
 On macOS:
 ```bash
-md5 test.zip
+md5 file_name.zip
 ```
 
 ---

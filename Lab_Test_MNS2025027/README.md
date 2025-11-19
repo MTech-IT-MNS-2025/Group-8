@@ -1,8 +1,6 @@
 # Lab Test – Diffie-Hellman Key Exchange (Cryptography)
 ---
 
----
-
 ## Platform Used
 - macOS (MacBook Air)
 

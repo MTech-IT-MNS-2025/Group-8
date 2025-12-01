@@ -97,6 +97,56 @@ Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:30
 ![Chat Interface View 2](public/chat3.png)
 -----
 
+
+## Folder Structure
+
+```text
+.
+├── app/
+│   ├── chat/
+│   │   ├── components/
+│   │   │   ├── ChatWindow.js
+│   │   │   └── ControlPanel.js
+│   │   ├── chat.css
+│   │   └── page.js               # Main Chat Client
+│   ├── register/
+│   │   ├── page.js
+│   │   └── register.css
+│   ├── mds/
+│   ├── home.css
+│   ├── layout.js
+│   ├── page.js                   # Login / Home
+│   └── provider.js
+├── pages/
+│   └── api/
+│       ├── crypto.js             # PQC Logic & WASM Bridge
+│       ├── deleteMessages.js
+│       ├── getPublicKey.js
+│       ├── login.js
+│       ├── message.js            # MongoDB Persistence
+│       ├── register.js
+│       └── users.js
+├── public/
+│   ├── chat.png
+│   ├── chat2.png
+│   ├── chat3.png
+│   ├── compile.md
+│   ├── kem_liboqs.c              # C Source Code
+│   ├── kem_liboqs.js             # WASM Glue Code
+│   ├── login.png
+│   └── register.png
+├── utils/
+│   ├── crypto.js                 # Smart Hex/Buffer Bridge
+│   └── .gitignore
+├── cli.js                        # Testing Script
+├── jsconfig.json
+├── next.config.mjs
+├── package.json
+├── question.txt
+├── readme.md
+└── server.js                     # Socket.IO Server
+```
+
 ## Architecture
 
 This project uses a unique hybrid architecture where the Frontend handles complex cryptographic operations via WebAssembly.

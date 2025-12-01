@@ -1,0 +1,483 @@
+"use client";
+
+import { useEffect, useState, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import io from "socket.io-client";
+import ControlPanel from "./components/ControlPanel";
+import ChatWindow from "./components/ChatWindow";
+import toast from "react-hot-toast";
+
+import "./chat.css";
+
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
+// TIMING CONFIG
+const PRE_GEN_TIME = 4.5 * 60 * 1000;
+const SWAP_TIME = 5.0 * 60 * 1000;
+
+function ChatPageInner() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    // REFS
+    const socketRef = useRef(null);
+    const myPrivateKeyRef = useRef(null); // Stores Uint8Array (Bytes)
+    const activeRecipientRef = useRef("");
+
+    const sessionKeyRef = useRef(null);
+    const mySessionKeyRef = useRef(null);
+    const currentCapsuleRef = useRef(null);
+    const myCapsuleRef = useRef(null);
+    const pendingKeysRef = useRef(null);
+
+    // STATE
+    const [username, setUsername] = useState("");
+    const [recipient, setRecipient] = useState("");
+    const [connected, setConnected] = useState(false);
+    const [message, setMessage] = useState("");
+    const [chat, setChat] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [onlineUsers, setOnlineUsers] = useState([]);
+
+    // 1. INITIALIZE
+    useEffect(() => {
+        if (myPrivateKeyRef.current) return;
+        const u = searchParams.get("user");
+        if (u) setUsername(u);
+        const storedKeyB64 = sessionStorage.getItem("chat_session_key");
+        if (storedKeyB64) {
+            sessionStorage.removeItem("chat_session_key");
+            const binaryString = atob(storedKeyB64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+            myPrivateKeyRef.current = bytes;
+        } else { router.push("/"); }
+    }, [searchParams, router]);
+
+    // Update Ref when State changes
+    useEffect(() => { activeRecipientRef.current = recipient; }, [recipient]);
+
+    useEffect(() => {
+        fetch("/api/users").then(r => r.json()).then(d => { if (Array.isArray(d)) setUsers(d); });
+    }, []);
+
+    // 2. SOCKETS
+    useEffect(() => {
+        socketRef.current = io();
+        socketRef.current.on("connect", () => { /* Wait for user */ });
+        socketRef.current.on("online-users", setOnlineUsers);
+
+        // --- HANDSHAKE LISTENER ---
+        socketRef.current.on("handshake_received", async (data) => {
+            if (!myPrivateKeyRef.current || activeRecipientRef.current !== data.from) return;
+            try {
+                // FIXED: Send privateKeyHex instead of bytes
+                const resRecover = await fetch("/api/crypto", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        action: "recoverSessionKey",
+                        payload: {
+                            capsuleHex: data.capsule,
+                            privateKeyHex: Buffer.from(myPrivateKeyRef.current).toString("hex")
+                        }
+                    })
+                });
+                const { sharedSecret } = await resRecover.json();
+
+                // sharedSecret is already a hex string now
+                sessionKeyRef.current = sharedSecret;
+                setConnected(true);
+                setChat(prev => [...prev, { from: "system", text: `🔐 Key Rotation`, time: new Date().toISOString() }]);
+            } catch (err) { console.error(err); }
+        });
+
+        // --- MESSAGE LISTENER ---
+        socketRef.current.on("receive-message", async (data) => {
+            if (data.from !== activeRecipientRef.current && data.from !== username) return;
+            let text = "🔒 [Fail]";
+
+            if (data.capsule && myPrivateKeyRef.current) {
+                try {
+                    // FIXED: Send privateKeyHex
+                    const resRecover = await fetch("/api/crypto", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            action: "recoverSessionKey",
+                            payload: {
+                                capsuleHex: data.capsule,
+                                privateKeyHex: Buffer.from(myPrivateKeyRef.current).toString("hex")
+                            }
+                        })
+                    });
+                    const { sharedSecret } = await resRecover.json();
+
+                    const resDecrypt = await fetch("/api/crypto", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            action: "decryptGCM",
+                            payload: { packet: data.packet, sessionKey: sharedSecret }
+                        })
+                    });
+                    const { message: decryptedMsg } = await resDecrypt.json();
+                    text = decryptedMsg;
+                    setConnected(true);
+                } catch (e) { console.error("Decryption error (New Key):", e); }
+            } else if (sessionKeyRef.current) {
+                try {
+                    const resDecrypt = await fetch("/api/crypto", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            action: "decryptGCM",
+                            payload: { packet: data.packet, sessionKey: sessionKeyRef.current }
+                        })
+                    });
+                    const { message: decryptedMsg } = await resDecrypt.json();
+                    text = decryptedMsg;
+                } catch (e) { console.error("Decryption error (Existing Key):", e); }
+            }
+            setChat(prev => [...prev, { from: data.from, text, time: data.time }]);
+        });
+
+        return () => socketRef.current?.disconnect();
+    }, []);
+
+    useEffect(() => {
+        if (username && socketRef.current) socketRef.current.emit("register-user", username);
+    }, [username]);
+
+
+    // 3. TIMER LOGIC
+    useEffect(() => {
+        let preGenTimer, swapTimer;
+
+        const preGenerateKeys = async () => {
+            if (!activeRecipientRef.current || !username) return;
+            console.log("🔄 Starting Key Rotation check...");
+
+            try {
+                // 1. Fetch Public Keys
+                const [resBob, resMe] = await Promise.all([
+                    fetch(`/api/getPublicKey?username=${encodeURIComponent(activeRecipientRef.current)}`),
+                    fetch(`/api/getPublicKey?username=${encodeURIComponent(username)}`)
+                ]);
+
+                if (!resBob.ok) throw new Error(`Failed to fetch Bob's key: ${resBob.status}`);
+                if (!resMe.ok) throw new Error(`Failed to fetch My key: ${resMe.status}`);
+
+                const bobData = await resBob.json();
+                const meData = await resMe.json();
+
+                if (bobData.publicKey && meData.publicKey) {
+                    console.log("✅ Keys fetched. Generating new capsules...");
+
+                    // 2. Call API for Bob (Next Session Key)
+                    const resExBob = await fetch("/api/crypto", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            action: "performKeyExchange",
+                            payload: { recipientPublicKeyHex: bobData.publicKey }
+                        })
+                    });
+                    if (!resExBob.ok) {
+                        const errText = await resExBob.text();
+                        throw new Error(`Key Exchange (Bob) failed: ${resExBob.status} - ${errText}`);
+                    }
+                    const exBob = await resExBob.json();
+
+                    // 3. Call API for Me (History Decryption)
+                    const resExMe = await fetch("/api/crypto", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            action: "performKeyExchange",
+                            payload: { recipientPublicKeyHex: meData.publicKey }
+                        })
+                    });
+                    if (!resExMe.ok) {
+                        const errText = await resExMe.text();
+                        throw new Error(`Key Exchange (Me) failed: ${resExMe.status} - ${errText}`);
+                    }
+                    const exMe = await resExMe.json();
+
+                    // 4. Stage the keys
+                    pendingKeysRef.current = {
+                        sessionKey: exBob.sharedSecret,
+                        mySessionKey: exMe.sharedSecret,
+                        currentCapsule: exBob.capsule,
+                        myCapsule: exMe.capsule
+                    };
+                    console.log("✨ Rotation keys ready.");
+                } else {
+                    console.warn("⚠️ Cannot rotate: Public keys missing.");
+                }
+            } catch (e) {
+                console.error("❌ Pre-generate keys failed:", e);
+            }
+        };
+
+        const swapKeys = () => {
+            if (!pendingKeysRef.current) return;
+            sessionKeyRef.current = pendingKeysRef.current.sessionKey;
+            mySessionKeyRef.current = pendingKeysRef.current.mySessionKey;
+            currentCapsuleRef.current = pendingKeysRef.current.currentCapsule;
+            myCapsuleRef.current = pendingKeysRef.current.myCapsule;
+            pendingKeysRef.current = null;
+
+            if (socketRef.current) {
+                socketRef.current.emit("handshake_packet", {
+                    to: activeRecipientRef.current,
+                    capsule: currentCapsuleRef.current
+                });
+            }
+            startTimers();
+        };
+
+        const startTimers = () => {
+            clearTimeout(preGenTimer);
+            clearTimeout(swapTimer);
+            preGenTimer = setTimeout(preGenerateKeys, PRE_GEN_TIME);
+            swapTimer = setTimeout(swapKeys, SWAP_TIME);
+        };
+
+        if (connected) startTimers();
+
+        return () => {
+            clearTimeout(preGenTimer);
+            clearTimeout(swapTimer);
+        };
+    }, [connected]);
+
+    // --- ACTIONS ---
+
+    const handleUserSelect = (newUser) => {
+        if (newUser !== recipient) {
+            setChat([]);
+            setConnected(false);
+            sessionKeyRef.current = null;
+            pendingKeysRef.current = null;
+        }
+        setRecipient(newUser);
+    };
+
+    const connect = async () => {
+        if (!recipient) return;
+        await loadHistory();
+        try {
+            const resKey = await fetch(`/api/getPublicKey?username=${encodeURIComponent(recipient)}`);
+            const data = await resKey.json();
+            if (data.publicKey) {
+                const resEx = await fetch("/api/crypto", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        action: "performKeyExchange",
+                        payload: { recipientPublicKeyHex: data.publicKey }
+                    })
+                });
+                const { capsule, sharedSecret } = await resEx.json();
+
+                sessionKeyRef.current = sharedSecret;
+                mySessionKeyRef.current = sharedSecret;
+
+                setConnected(true);
+                toast.success(`Connected to ${decodeURIComponent(recipient)}`, {
+                    duration: 3000,
+                    icon: "✔️",
+                });
+                socketRef.current.emit("handshake_packet", { to: recipient, capsule });
+            } else {
+                alert("User keys not found");
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const loadHistory = async () => {
+        const res = await fetch(`/api/message?user1=${encodeURIComponent(username)}&user2=${encodeURIComponent(recipient)}`);
+        if (res.ok) {
+            const history = await res.json();
+            const decrypted = await Promise.all(history.map(async (msg) => {
+                try {
+                    const isMe = msg.from === username;
+                    const targetCapsule = isMe ? msg.senderCapsule : msg.capsule;
+                    const targetPacket = isMe ? msg.senderPacket : msg.packet;
+
+                    if (targetCapsule && myPrivateKeyRef.current) {
+                        // FIXED: Send privateKeyHex
+                        const resRecover = await fetch("/api/crypto", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                action: "recoverSessionKey",
+                                payload: {
+                                    capsuleHex: targetCapsule,
+                                    privateKeyHex: Buffer.from(myPrivateKeyRef.current).toString("hex")
+                                }
+                            })
+                        });
+                        const { sharedSecret } = await resRecover.json(); // hex string
+
+                        const resDecrypt = await fetch("/api/crypto", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                action: "decryptGCM",
+                                payload: { packet: targetPacket, sessionKey: sharedSecret }
+                            })
+                        });
+                        const { message: decryptedMsg } = await resDecrypt.json();
+                        return { from: msg.from, text: decryptedMsg, time: msg.time };
+                    }
+                    return { from: msg.from, text: "🔒", time: msg.time };
+                } catch (e) {
+                    console.error("History decryption error:", e);
+                    return { from: msg.from, text: "⚠️", time: msg.time };
+                }
+            }));
+            setChat(decrypted);
+        }
+    };
+
+    const sendMessage = async () => {
+        if (!message || !recipient) return;
+        if (!sessionKeyRef.current) return alert("Connect first!");
+
+        const [resBob, resMe] = await Promise.all([
+            fetch(`/api/getPublicKey?username=${encodeURIComponent(recipient)}`),
+            fetch(`/api/getPublicKey?username=${encodeURIComponent(username)}`)
+        ]);
+        const bobData = await resBob.json();
+        const meData = await resMe.json();
+
+        // 1. Encrypt for Bob
+        const resExBob = await fetch("/api/crypto", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "performKeyExchange",
+                payload: { recipientPublicKeyHex: bobData.publicKey }
+            })
+        });
+        const exBob = await resExBob.json();
+
+        const resEncryptBob = await fetch("/api/crypto", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "encryptGCM",
+                payload: { text: message, sessionKey: exBob.sharedSecret } // sharedSecret is Hex
+            })
+        });
+        const packetBob = await resEncryptBob.json();
+
+
+        // 2. Encrypt for Me (Sender)
+        const resExMe = await fetch("/api/crypto", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "performKeyExchange",
+                payload: { recipientPublicKeyHex: meData.publicKey }
+            })
+        });
+        const exMe = await resExMe.json();
+
+        const resEncryptMe = await fetch("/api/crypto", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "encryptGCM",
+                payload: { text: message, sessionKey: exMe.sharedSecret } // FIXED: Removed .toString("hex") as it's already hex
+            })
+        });
+        const packetMe = await resEncryptMe.json();
+
+        // Update Session
+        sessionKeyRef.current = exBob.sharedSecret;
+        currentCapsuleRef.current = exBob.capsule;
+        mySessionKeyRef.current = exMe.sharedSecret;
+        myCapsuleRef.current = exMe.capsule;
+
+        await fetch("/api/message", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                from: username, to: recipient,
+                packet: packetBob, capsule: exBob.capsule,
+                senderPacket: packetMe, senderCapsule: exMe.capsule
+            }),
+        });
+
+        socketRef.current.emit("send-message", {
+            to: recipient,
+            packet: packetBob,
+            capsule: exBob.capsule
+        });
+
+        setChat((prev) => [...prev, { from: username, text: message, time: new Date().toISOString() }]);
+        setMessage("");
+    };
+
+    const disconnect = () => {
+        sessionKeyRef.current = null;
+        setConnected(false);
+        toast.success(`${decodeURIComponent(recipient)} Disconnected!`, {
+            duration: 3000,
+            icon: "❎",
+        });
+        setRecipient("");
+        setChat([]);
+    };
+
+    return (
+        <div className="chat-page">
+            <div className="chat-container">
+                <div className="top-bar">
+                    <button onClick={() => router.push("/")} className="home-button">Home</button>
+                    <span className="profile-badge">User: <strong>{username}</strong></span>
+                </div>
+
+                <div className="chat-card">
+                    <ControlPanel
+                        users={users}
+                        recipient={recipient}
+                        onlineUsers={onlineUsers}
+                        currentUser={username}
+                        onSelectUser={handleUserSelect}
+                        onConnect={connect}
+                        onClear={() => {
+                            toast.success(`Screen Cleared!`, { duration: 3000, icon: "🧹" });
+                            setChat([]);
+                        }}
+                        onDelete={async () => {
+                            await fetch("/api/deleteMessages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ user1: username, user2: recipient }) });
+                            toast.success(`Chat History Cleared!`, { duration: 3000, icon: "🗑️" });
+                            setChat([]);
+                        }}
+                        onDisconnect={disconnect}
+                    />
+
+                    <ChatWindow
+                        chat={chat}
+                        currentUser={username}
+                        message={message}
+                        setMessage={setMessage}
+                        onSendMessage={sendMessage}
+                        connected={connected}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default function ChatPage() {
+    return <Suspense fallback={<div>Loading...</div>}><ChatPageInner /></Suspense>;
+}

@@ -1,0 +1,342 @@
+/* app/chat/chat.css */
+
+/* 1. PAGE LAYOUT */
+.chat-page {
+    height: 100dvh;
+    /* Force full screen height */
+    width: 100vw;
+    background-color: #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: system-ui, -apple-system, sans-serif;
+    padding: 1rem;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.chat-container {
+    width: 100%;
+    max-width: 800px;
+    /* Controls width of BOTH Top Bar and Card */
+    height: 90vh;
+    /* Total height of the widget */
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    /* Gap between Top Bar and Card */
+}
+
+
+
+/* 2. TOP BAR */
+.top-bar {
+    width: 100%;
+    max-width: 800px;
+    flex-shrink: 0;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
+}
+
+.home-button {
+    background-color: #374151;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.profile-badge {
+    background: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    color: #111827;
+    font-weight: 700;
+    border: 1px solid #d1d5db;
+}
+
+/* 3. MAIN CARD - THE FIX */
+.chat-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 800px;
+    /* DESKTOP HEIGHT: Fixed at 85% of screen */
+    height: 85vh;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Fix for flexbox scrolling issues */
+    min-height: 0;
+}
+
+/* 4. HEADER (Controls) */
+.recipient-row {
+    padding: 0.75rem;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    /* Never shrink */
+    align-items: center;
+    flex-wrap: wrap;
+    /* Wrap on mobile */
+}
+
+/* SELECT DROPDOWN STYLE */
+.recipient-select {
+    flex-grow: 10;
+    /* Takes up the most space in the row */
+    padding: 0 0.8rem;
+    /* Comfortable padding */
+    height: 38px;
+    /* Exact height match for buttons */
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background-color: #ffffff;
+    /* Force White */
+    color: #1f2937;
+    /* Dark Gray Text (High Contrast) */
+    cursor: pointer;
+    min-width: 150px;
+    /* Prevents it from crushing too small */
+
+    /* Standard Browser Appearance (Reliable across Firefox/Chrome/Edge) */
+    appearance: auto;
+    -webkit-appearance: auto;
+}
+
+.recipient-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    /* Blue border when clicked */
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    /* Subtle blue glow */
+}
+
+
+
+/* Buttons */
+.connect-button,
+.refresh-button,
+.delete-button,
+.disconnect-button {
+    flex: 1 1 auto;
+    border: none;
+    border-radius: 6px;
+    padding: 0 1rem;
+    height: 40px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: center;
+    transition: background-color 0.2s ease;
+    /* Makes the hover smooth */
+}
+
+/* CONNECT (Blue) */
+.connect-button {
+    background: #2563eb;
+}
+
+.connect-button:hover {
+    background: #1d4ed8;
+}
+
+/* CLEAR (Orange) */
+.refresh-button {
+    background: #f59e0b;
+}
+
+.refresh-button:hover {
+    background: #d97706;
+}
+
+/* Fix: Added :hover */
+
+/* DELETE (Red) */
+.delete-button {
+    background: #ef4444;
+}
+
+.delete-button:hover {
+    background: #dc2626;
+}
+
+/* Fix: Added :hover */
+
+/* DISCONNECT (Dark Gray) */
+.disconnect-button {
+    background: #4b5563;
+}
+
+.disconnect-button:hover {
+    background: #374151;
+}
+
+/* Fix: Added :hover */
+/* 5. CHAT WINDOW - SCROLL AREA */
+.chat-window {
+    flex: 1;
+    /* Fill all remaining space */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #f9fafb;
+    position: relative;
+    min-height: 0;
+    /* Critical Fix */
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    /* Scroll here */
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* MESSAGE STYLE */
+.message {
+    padding: 8px 0;
+    border-bottom: 1px dashed #e5e7eb;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+    color: #374151;
+}
+
+.message:last-child {
+    border-bottom: none;
+}
+
+.message.me {
+    text-align: right;
+    color: #1e3a8a;
+}
+
+.message.them {
+    text-align: left;
+    color: #065f46;
+}
+
+.message.system {
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+    font-size: 0.8rem;
+    padding: 10px 0;
+}
+
+.from {
+    font-weight: bold;
+    margin-right: 5px;
+    color: #111827;
+}
+
+.timestamp {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    margin-left: 8px;
+}
+
+/* 6. FOOTER (Input) */
+.input-row {
+    flex-shrink: 0;
+    /* Never shrink */
+    padding: 0.75rem;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.message-input {
+    flex: 1;
+    padding: 0.7rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #000;
+}
+
+.send-button {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 0 1.5rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.send-button:hover {
+    background: #0d9a6b;
+
+}
+
+/* 7. MOBILE OVERRIDES - THE FIX */
+@media (max-width: 600px) {
+    .chat-page {
+        padding: 5px;
+        /* Remove padding */
+    }
+
+    .chat-container {
+        height: 100dvh;
+        /* Full screen on phone */
+        max-width: 100%;
+        gap: 0;
+    }
+
+    .chat-card {
+        /* MOBILE HEIGHT: Force full screen height */
+        height: 100dvh !important;
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .top-bar {
+        padding: 0.5rem;
+        background: #f3f4f6;
+        margin-bottom: 0;
+    }
+
+    .recipient-row {
+        gap: 0.4rem;
+        padding: 0.5rem;
+    }
+
+    .recipient-select {
+        width: 100%;
+        flex-basis: 100%;
+        /* Force full width on mobile */
+        margin-bottom: 5px;
+    }
+
+    /* Buttons: 2 per row */
+    .connect-button,
+    .refresh-button,
+    .delete-button,
+    .disconnect-button {
+        flex: 1 1 48%;
+        font-size: 0.8rem;
+    }
+}

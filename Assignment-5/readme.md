@@ -81,11 +81,20 @@ Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:30
 
 ## Screenshots
 
+###Login
 ![Login Page Screenshot](public/login.png)
+
+###Register
 ![Register Page Screenshot](public/register.png)
+
+###Chat Interface 1
 ![Chat Interface View 1](public/chat.png)
+
+###Online Users List
 ![Chat Interface View 2](public/chat2.png)
-![Chat Interface View 2](public/chat2.png)
+
+###Communication Between Two Users
+![Chat Interface View 2](public/chat3.png)
 -----
 
 ## Architecture
